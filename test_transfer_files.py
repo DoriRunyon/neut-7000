@@ -21,7 +21,8 @@ class TestFileTransfer(unittest.TestCase):
 
     def add_file_to_directory(self, directory):
         path = directory["path"]
-        open("{}/testing_file.txt".format(path), "w+")
+        file = open("{}/testing_file.txt".format(path), "w+")
+        file.close()
     
     def test_happy_path(self):
         self.add_file_to_directory(self.directory_a)
@@ -47,9 +48,6 @@ class TestFileTransfer(unittest.TestCase):
         
         self.assertEqual(len(a_files), 0)
         self.assertEqual(len(b_files), 1)
-
-
-
 
 if __name__ == "__main__":
     unittest.main()

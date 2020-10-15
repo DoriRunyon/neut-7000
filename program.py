@@ -1,25 +1,46 @@
-from keys import build_key_dict, KeyName
+import os
+
+from key import KeyName, Key, StorageKey
+from enum import Enum
+
+
+# run all tests: python3 -m unittest discover -s neut -p '*test_'
+
+PATH_TO_STORAGE = "/home/pi/Desktop/neut_files/"
 
 def program():
+    neut = Program()
     
-    LAST_KEY_PRESS = None
-    POWER_ON = False
-    key_dict = build_key_dict()
+    power_key = neut.create_key(name="power", key_value="0", is_storage=False)
+    neut_key = neut.create_key(name="neut", key_value="1", is_storage=False)
+    op_1_key = neut.create_key(name="op-1", key_value="2", is_storage=False)
+    storage_1 = neut.create_key(name="storage-1", key_value="3")
     
-    while POWER_ON is False:
-        # wait some seconds
-        print("please enter a key id")
+    neut.create_allowed_command(ProgramState.power_off, [power_key.key_value])
+    
+    print("Available storage: ", neut.available_storage)
+    if not os.path.isdir(PATH_TO_STORAGE):
+        os.mkdir(PATH_TO_STORAGE)
+        create_storage(neut)
+    else:
+        load_storage(neut)
+    
+    
+    while neut.state == ProgramState.power_off:
         key_press = input()
-        print("key id: {}".format(key_press))
-        if int(key_press) == key_dict[KeyName.power].key_id:
+        if neut.is_valid_command(key_press):
             print("powering on!")
-            POWER_ON = True
-        
-        # program()
-        
+            neut.state = ProgramState.power_on
+            
+    key_press = input()
     
-    # power on = run_setup()
-    
+    if key_press == "xyz":
+        print("powering off")
+        os.popen("sudo poweroff")
+    # if key press is power off and "x" seconds passes,
+    # key value is "sudo poweroff + enter"
+
+
     # Run setup:
         # Turn on raspberry pi and mount OP
         # set up keys - switch lights on for keys where needed (all keys - blinking lights during setup)
@@ -49,9 +70,73 @@ def power_on():
 def power_off():
     pass
 
-def setup_storage_keys():
-    pass
+def create_storage(neut):
+    """Create storage from scratch"""
+    neut_keys = neut.keys.values()
+    
+    for key in neut_keys:
+        if isinstance(key, StorageKey):
+            file_path = PATH_TO_STORAGE + key.name
+            os.mkdir(file_path)
+            key.file_path = file_path
+            print("STORAGE CREATED!!", key.file_path)
+            
+def load_storage(neut):
+    neut_keys = neut.keys.values()
+    
+    for key in neut_keys:
+        if isinstance(key, StorageKey):
+            file_path = PATH_TO_STORAGE + key.name
+            assert os.path.isdir(file_path) is True
+            key.file_path = file_path
+            print("FILE PATH LOADED!!", key.file_path)
+    
 
+class ProgramState(Enum): # maybe these aren't necessary since power off/on and device detection aren't
+    # handled by this program
+    power_on = "power_on"
+    power_off = "power_off"
+    ready_for_commands = "ready_for_commands"
+    files_incoming = "files_incoming"
+    files_outgoing = "files_outgoing"
+    
+class Program:
+    
+    def __init__(self, name=""):
+        self.name = name
+        self.state = ProgramState.power_off
+        self.last_key_press = "ready"
+        self.keys = {}
+        self.available_storage = 0
+        self.allowed_commands = {} # key: program state, value: allowed key presses from this state
+        
+    def create_allowed_command(self, keys):
+        """Create a rule mapping the last key pressed to allowed keys."""
+        self.allowed_commands[last_key_press] = keys
+        
+    def is_valid_command(self, key_press):
+        
+        if key_press in self.allowed_commands[self.state]:
+            return True
+        
+        return False
+        
+    def create_key(self, name, key_value, is_storage=True):
+        
+        if is_storage:
+            self.keys[name] = StorageKey(name=name, key_value=key_value)
+            self.available_storage += 1
+            return self.keys[name]
+        
+        self.keys[name] = Key(name=name, key_value=key_value)
+        return self.keys[name]
+    
+
+
+# Oct 13 to do
+# write tests for functions created !! (create a separate test file too)
+        
+            
 # ideas
 ## lights for errors
 ## lights for low battery

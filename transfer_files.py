@@ -1,7 +1,6 @@
 import uuid
 
 from argparse import ArgumentTypeError
-from exceptions import Exception
 from os import listdir, mkdir,remove
 from os.path import isfile, join
 from shutil import copyfile, move, rmtree
@@ -39,10 +38,9 @@ def transfer_files(a, b):
         print("Removing directory {} files".format(b["name"]))
         print("b path one", b_path)
         rmtree(b_path) # fix this for actual script
-        # mkdir(b_path)
+        mkdir(b_path)
         print(b_files)
         print("b path two", b_path)
-        assert len(b_files) == 0
 
     for file in a_files:
         print("Transfering files to ", b["name"], "!")
