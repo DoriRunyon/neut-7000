@@ -16,7 +16,7 @@ def program():
     op_1_key = neut.create_key(name="op-1", key_value="2", is_storage=False)
     storage_1 = neut.create_key(name="storage-1", key_value="3")
     
-    neut.create_allowed_command(ProgramState.power_off, [power_key.key_value])
+    # neut.create_allowed_command(ProgramState.power_off, [power_key.key_value])
     
     print("Available storage: ", neut.available_storage)
     if not os.path.isdir(PATH_TO_STORAGE):
@@ -28,7 +28,8 @@ def program():
     
     while neut.state == ProgramState.power_off:
         key_press = input()
-        if neut.is_valid_command(key_press):
+        # if neut.is_valid_command(key_press):
+        if key_press == 0:
             print("powering on!")
             neut.state = ProgramState.power_on
             
@@ -92,8 +93,7 @@ def load_storage(neut):
             print("FILE PATH LOADED!!", key.file_path)
     
 
-class ProgramState(Enum): # maybe these aren't necessary since power off/on and device detection aren't
-    # handled by this program
+class ProgramState(Enum): # maybe these aren't necessary
     power_on = "power_on"
     power_off = "power_off"
     ready_for_commands = "ready_for_commands"
@@ -105,21 +105,20 @@ class Program:
     def __init__(self, name=""):
         self.name = name
         self.state = ProgramState.power_off
-        self.last_key_press = "ready"
+        self.last_key_press = None
         self.keys = {}
         self.available_storage = 0
-        self.allowed_commands = {} # key: program state, value: allowed key presses from this state
+        self.allowed_commands = {}
         
-    def create_allowed_command(self, keys):
-        """Create a rule mapping the last key pressed to allowed keys."""
-        self.allowed_commands[last_key_press] = keys
-        
-    def is_valid_command(self, key_press):
-        
-        if key_press in self.allowed_commands[self.state]:
-            return True
-        
-        return False
+    def create_allowed_command(self, args*):
+        pass
+
+#     def is_valid_command(self, key_press):
+#         
+#         if key_press in self.allowed_commands[self.state]:
+#             return True
+#         
+#         return False
         
     def create_key(self, name, key_value, is_storage=True):
         
