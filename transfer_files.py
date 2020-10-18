@@ -11,8 +11,8 @@ HARD_DRIVE = {"path": "/media/pi/backup/caperbunny/", "name": "External Hard Dri
 
 class NoFilesToMove(Exception):
     
-    def __init__(self):
-        pass
+    def __init__(self, message):
+        self.message = "no files to move"
 
 def neut_file_transfer(to_neut=False):
     to_neut = string_to_bool(to_neut)
@@ -21,31 +21,29 @@ def neut_file_transfer(to_neut=False):
     else:
         transfer_files(NEUT, HARD_DRIVE)
 
-def transfer_files(a, b):
+def transfer_files(a_path, b_path):
     """Transfer all files in directory 'a' to directory 'b'."""
-
-    a_path = a["path"]
-    b_path = b["path"]
 
     a_files = [f for f in listdir(a_path) if isfile(join(a_path, f))]
     b_files = [f for f in listdir(b_path) if isfile(join(b_path, f))]
 
     if (len(a_files) < 1):
-        print("No files to move")
         raise NoFilesToMove()
-    
+
+    # empty target directory if it has files
     if (len(b_files) > 0):
-        print("Removing directory {} files".format(b["name"]))
-        print("b path one", b_path)
         rmtree(b_path) # fix this for actual script
         mkdir(b_path)
-        print(b_files)
-        print("b path two", b_path)
 
     for file in a_files:
-        print("Transfering files to ", b["name"], "!")
         file_path = "{}{}".format(a_path, file)
         move(file_path, b_path)
+
+    # empty source directory after files have moved
+    if (len(a_files) > 0):
+        rmtree(a_path) # fix this for actual script
+        mkdir(a_path)
+    
 
 def string_to_bool(v):
     if isinstance(v, bool):
