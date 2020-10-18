@@ -24,7 +24,6 @@ def program_setup():
 
     shutil.rmtree(PATH_TO_DEVICE)
     shutil.rmtree(PATH_TO_STORAGE)
-    print("initializing!")
     neut = Program()
 
     # neut_key = neut.create_key(name="neut", value="1", is_storage=False)
@@ -56,7 +55,7 @@ def listen_for_device(neut):
         add_file_to_directory(PATH_TO_DEVICE)
         # end for testing
         if os.path.isdir(PATH_TO_DEVICE):
-            op_1_key = neut.keys["3"]
+            op_1_key = neut.get_key_by_name("op-1")
             op_1_key.file_path = PATH_TO_DEVICE
             print("ready for commands!")
             neut.state = ProgramState.ready_for_commands
@@ -141,6 +140,14 @@ class Program:
         self.keys[value] = Key(name=name, value=value)
         self.key_name_to_value_mapping[name] = value
         return self.keys[value]
+
+    def get_key_by_name(self, name):
+        key_value = self.key_name_to_value_mapping.get(name)
+        key = self.keys[key_value]
+        if key:
+            return self.keys[key.value]
+        else:
+            raise Exception("No key found for name: ".format(name))
 
 
 
