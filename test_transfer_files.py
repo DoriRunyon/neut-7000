@@ -1,4 +1,4 @@
-from os.path import isfile, join
+from os.path import isdir, isfile, join
 from os import listdir, mkdir
 import shutil
 import unittest
@@ -8,8 +8,12 @@ from transfer_files import NoFilesToMove, transfer_files
 class TestFileTransfer(unittest.TestCase):
 
     def setUp(self):
-        self.a_path = "/home/pi/Desktop/neut/test_folder_a/"
-        self.b_path = "/home/pi/Desktop/neut/test_folder_b/"
+        if isdir("/home/pi/Desktop/"):
+            self.a_path = "/home/pi/Desktop/neut/test_folder_a/"
+            self.b_path = "/home/pi/Desktop/neut/test_folder_b/"
+        elif isdir("/tmp"):
+            self.a_path = "/tmp/test_folder_a/"
+            self.b_path = "/tmp/test_folder_b/"
         mkdir(self.a_path)
         mkdir(self.b_path)
         self.directory_a = {"name": "a_directory", "path": self.a_path}
